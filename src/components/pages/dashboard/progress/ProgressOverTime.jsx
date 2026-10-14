@@ -28,6 +28,8 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WEEKLY_PROGRESS } from "./progressData";
 
+
+// vertical={false}
 // Select values are the visible labels on purpose: the trigger then always shows the label.
 const RANGES = {
   "Last 4 weeks": 4,
@@ -136,7 +138,7 @@ export default function ProgressOverTime() {
                 <stop offset="95%" stopColor="var(--color-completion)" stopOpacity={0.02} />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" />
+            <CartesianGrid  strokeDasharray="3 3" />
             <XAxis dataKey="week" tickLine={false} axisLine={false} tickMargin={8} />
             <YAxis
               domain={[0, 100]}

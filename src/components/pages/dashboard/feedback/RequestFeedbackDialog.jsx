@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { MessageSquarePlus, Send, CheckCircle2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,11 +8,26 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
 import { MENTORS } from "./feedbackData";
 
 export default function RequestFeedbackDialog({ open, onOpenChange, form, onFormChange, onSubmit, sent }) {
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const mentorLabel = MENTORS.find((m) => m.value === form.mentor)?.label ?? "your mentor";
+
+  const handleOpenChange = (next) => {
+    if (!next) setShowConfirm(false);
+    onOpenChange(next);
+  };
+
+  const handleConfirm = () => {
+    setShowConfirm(false);
+    onSubmit();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         {sent ? (
           <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
@@ -24,11 +40,17 @@ export default function RequestFeedbackDialog({ open, onOpenChange, form, onForm
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-sm font-bold">
                 <MessageSquarePlus className="h-4.5 w-4.5 text-indigo-600" />
-                Request Feedback
+                Feedback
               </DialogTitle>
             </DialogHeader>
 
-            <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="flex flex-col gap-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (form.mentor && form.subject) setShowConfirm(true);
+              }}
+              className="flex flex-col gap-4"
+            >
               <p className="text-xs text-slate-500 dark:text-slate-400">Ask your mentor for feedback on your recent work.</p>
 
               <div className="space-y-1.5">
@@ -70,7 +92,7 @@ export default function RequestFeedbackDialog({ open, onOpenChange, form, onForm
               </div>
 
               <DialogFooter>
-                <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancel</Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => handleOpenChange(false)}>Cancel</Button>
                 <Button type="submit" size="sm" disabled={!form.mentor || !form.subject} className="gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700">
                   <Send className="h-3.5 w-3.5" />
                   Send Request
@@ -79,6 +101,19 @@ export default function RequestFeedbackDialog({ open, onOpenChange, form, onForm
             </form>
           </>
         )}
+
+        <ConfirmDialog
+          open={showConfirm && !sent}
+          onOpenChange={setShowConfirm}
+          icon={Send}
+          title="Send Feedback Request"
+          subtitle="Your mentor will be notified"
+          description={`Send this feedback request${form.subject ? ` for "${form.subject}"` : ""} to ${mentorLabel}?`}
+          confirmLabel="Send Request"
+          cancelLabel="Cancel"
+          onConfirm={handleConfirm}
+          destructive={false}
+        />
       </DialogContent>
     </Dialog>
   );

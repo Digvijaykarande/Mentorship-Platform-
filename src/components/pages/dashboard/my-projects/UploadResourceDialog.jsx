@@ -1,11 +1,23 @@
 "use client";
 
 import { FilePlus, UploadCloud } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const CATEGORIES = [
   { value: "picture_as_pdf", label: "PDF Specification / Brief" },
@@ -14,7 +26,13 @@ const CATEGORIES = [
   { value: "terminal", label: "Code Script / CLI Utility" },
 ];
 
-export default function UploadResourceDialog({ open, onOpenChange, form, onFormChange, onSubmit }) {
+export default function UploadResourceDialog({
+  open,
+  onOpenChange,
+  form,
+  onFormChange,
+  onSubmit,
+}) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -25,9 +43,17 @@ export default function UploadResourceDialog({ open, onOpenChange, form, onFormC
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="flex flex-col gap-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit();
+          }}
+          className="flex flex-col gap-4"
+        >
           <div className="space-y-1.5">
-            <Label className="text-[11px] font-semibold">Document / Asset Title</Label>
+            <Label className="text-[11px] font-semibold">
+              Document / Asset Title
+            </Label>
             <Input
               required
               placeholder="e.g. Module 2 Deliverable Architecture.pdf"
@@ -39,13 +65,18 @@ export default function UploadResourceDialog({ open, onOpenChange, form, onFormC
 
           <div className="space-y-1.5">
             <Label className="text-[11px] font-semibold">Asset Category</Label>
-            <Select value={form.category} onValueChange={(val) => onFormChange("category", val)}>
+            <Select
+              value={form.category}
+              onValueChange={(val) => onFormChange("category", val)}
+            >
               <SelectTrigger className="w-full text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                  <SelectItem key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -53,13 +84,28 @@ export default function UploadResourceDialog({ open, onOpenChange, form, onFormC
 
           <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-6 text-center dark:border-slate-800 dark:bg-slate-900/30">
             <UploadCloud className="h-6 w-6 text-indigo-500" />
-            <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Click to choose file or drag & drop</span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500">PDF, DOCX, ZIP, or PNG up to 25MB</span>
+            <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
+              Click to choose file or drag & drop
+            </span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500">
+              PDF, DOCX, ZIP, or PNG up to 25MB
+            </span>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" size="sm" className="gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              className="gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700"
+            >
               <UploadCloud className="h-3.5 w-3.5" />
               Upload Asset
             </Button>

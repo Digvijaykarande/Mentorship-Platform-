@@ -4,7 +4,7 @@ import { Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 /**
- * Lightweight placeholder for profile tabs not yet built out (Details, Settings, Share).
+ * Lightweight placeholder for profile tabs not yet built out.
  * Swap this out per-tab as those flows get designed.
  */
 export default function ProfileComingSoon({ label }) {

@@ -1,10 +1,5 @@
-import React from 'react'
+import OverviewPage from "@/components/pages/dashboard/overview/OverviewPage";
 
-const DashboardPage = () => {
-  return (
-    <>
-    </>
-  )
+export default function Page() {
+  return <OverviewPage />;
 }
-
-export default DashboardPage

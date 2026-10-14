@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
-import { useTheme } from "next-themes";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { useTheme } from "@/lib/theme";
 import { Save, Check } from "lucide-react";
 
 import PageHeader from "@/components/common/PageHeader";
@@ -15,41 +15,94 @@ import NotificationsCard, { NOTIFS } from "@/components/pages/dashboard/settings
 import DataPrivacyCard from "@/components/pages/dashboard/settings/DataPrivacyCard";
 import DangerZoneCard from "@/components/pages/dashboard/settings/DangerZoneCard";
 
-function useSettingsForm() {
-  const [form, setForm] = useState({
-    name: "Digvijay",
-    email: "karandedigvijay2@gmail.com",
-    accountId: "INT-2026-001",
-    accountType: "Intern",
-    currentPass: "",
-    newPass: "",
-    confirmPass: "",
-    twoFactor: true,
-    language: "English",
-    compactSidebar: false,
-    notifications: Object.fromEntries(NOTIFS.map(([key]) => [key, true])),
-  });
+const SETTINGS_STORAGE_KEY = "intern-settings-v1";
 
-  const update = (key, val) => setForm((p) => ({ ...p, [key]: val }));
-  const updateNotif = (key) =>
-    setForm((p) => ({ ...p, notifications: { ...p.notifications, [key]: !p.notifications[key] } }));
-
-  return { form, update, updateNotif };
-}
+const DEFAULT_FORM = {
+  name: "Digvijay",
+  email: "karandedigvijay2@gmail.com",
+  accountId: "INT-2026-001",
+  accountType: "Intern",
+  currentPass: "",
+  newPass: "",
+  confirmPass: "",
+  twoFactor: true,
+  language: "English",
+  compactSidebar: false,
+  notifications: Object.fromEntries(NOTIFS.map(([key]) => [key, true])),
+};
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
 
-  const { form, update, updateNotif } = useSettingsForm();
+  const [form, setForm] = useState(DEFAULT_FORM);
   const [saved, setSaved] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [toast, setToast] = useState({ show: false, title: "", description: "", variant: "success" });
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SETTINGS_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setForm((prev) => ({
+          ...prev,
+          ...parsed,
+          currentPass: "",
+          newPass: "",
+          confirmPass: "",
+        }));
+      }
+    } catch {
+      // LocalStorage error fallback
+    }
+  }, []);
+
+  const update = (key, val) => setForm((p) => ({ ...p, [key]: val }));
+  const updateNotif = (key) =>
+    setForm((p) => ({ ...p, notifications: { ...p.notifications, [key]: !p.notifications[key] } }));
+
+  const showFeedback = (title, description, variant = "success") => {
+    setToast({ show: true, title, description, variant });
+    setTimeout(() => setToast((prev) => ({ ...prev, show: false })), 3500);
+  };
 
   const handleSave = () => {
+    // Validate password changes if entered
+    if (form.newPass || form.confirmPass) {
+      if (!form.currentPass) {
+        showFeedback("Password Error", "Please enter your current password to set a new password.", "error");
+        return;
+      }
+      if (form.newPass.length < 8) {
+        showFeedback("Password Error", "New password must be at least 8 characters long.", "error");
+        return;
+      }
+      if (form.newPass !== form.confirmPass) {
+        showFeedback("Password Error", "New password and confirmation password do not match.", "error");
+        return;
+      }
+    }
+
+    try {
+      const toSave = {
+        name: form.name,
+        email: form.email,
+        accountId: form.accountId,
+        accountType: form.accountType,
+        twoFactor: form.twoFactor,
+        language: form.language,
+        compactSidebar: form.compactSidebar,
+        notifications: form.notifications,
+      };
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(toSave));
+    } catch {
+      // fallback
+    }
+
+    setForm((prev) => ({ ...prev, currentPass: "", newPass: "", confirmPass: "" }));
     setSaved(true);
-    setShowToast(true);
+    showFeedback("Settings saved", "Your profile and security preferences have been saved successfully.");
     setTimeout(() => setSaved(false), 2000);
-    setTimeout(() => setShowToast(false), 3000);
   };
 
   const handleExport = () => {
@@ -60,15 +113,25 @@ export default function SettingsPage() {
     link.download = "settings.json";
     link.click();
     URL.revokeObjectURL(url);
+    showFeedback("Data exported", "Your preferences and profile data were downloaded.");
+  };
+
+  const handleResetSettings = () => {
+    try {
+      localStorage.removeItem(SETTINGS_STORAGE_KEY);
+    } catch {}
+    setForm(DEFAULT_FORM);
+    showFeedback("Reset Complete", "Settings were restored to defaults.", "error");
   };
 
   return (
     <div className="relative mx-auto max-w-5xl space-y-5 p-4 sm:p-6">
       <SaveToast
-        show={showToast}
-        title="Settings saved"
-        description="Your changes have been saved successfully."
-        onClose={() => setShowToast(false)}
+        show={toast.show}
+        title={toast.title}
+        description={toast.description}
+        variant={toast.variant}
+        onClose={() => setToast((prev) => ({ ...prev, show: false }))}
       />
 
       <PageHeader title="Settings" subtitle="Manage your profile, security, appearance, and system preferences">
@@ -90,7 +153,7 @@ export default function SettingsPage() {
         <DataPrivacyCard onExport={handleExport} />
       </div>
 
-      <DangerZoneCard onConfirmDelete={() => {}} />
+      <DangerZoneCard onConfirmDelete={handleResetSettings} />
     </div>
   );
 }

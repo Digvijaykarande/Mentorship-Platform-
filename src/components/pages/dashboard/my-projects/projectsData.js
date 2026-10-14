@@ -1,66 +1,54 @@
 // projectsData.js
 // Central mock/data source for the "My Projects" intern dashboard.
 // Replace these exports with real API/DB calls later without changing components.
+//
+// Data model notes:
+// - Each project owns its own `tasks` (used for roadmap progress), its
+//   `roadmap` (Learning & Task Roadmap phases) and its mentor-shared
+//   `documentation` (requirements & specs, see documentationData.js).
+// - Every task carries a `phaseId` that points at one of its project's
+//   roadmap phases, so the roadmap can show live "x/y deliverables done"
+//   progress per phase instead of a static timeline.
+// - Every project points at a `mentorId` in `mentors`, and carries its own
+//   `mentorFeedback` so the compact mentor card is specific to that project.
+// - `resources` are project-specific; `programResources` are shared across
+//   every project (shown as "Program-wide" in Resources & Specs).
+
+import { projectDocumentation } from "./documentationData";
 
 /* =========================================================
-   SUMMARY STATS
+   SUMMARY STATS (top stat cards — unchanged)
 ========================================================= */
 
-export const summaryStats = [
-  {
-    id: "total-projects",
-    label: "Total Projects",
-    value: "4",
-    icon: "source",
-    trendLabel: "+1 this month",
-    trendIcon: "trending_up",
-    trendTone: "secondary",
-    footerRight: "1 completed",
-  },
-
-  {
-    id: "active-projects",
-    label: "Active Projects",
-    value: "3",
-    icon: "bolt",
-    valueTone: "primary",
-    iconTone: "primary",
-    footerDotTone: "secondary",
-    footerLeftText: "2 In Progress",
-    footerRightBadge: "Current Sprint",
-  },
-
-  {
-    id: "milestones",
-    label: "Milestones Completed",
-    value: "12",
-    valueSuffix: "/ 16",
-    icon: "flag_circle",
-    iconTone: "secondary",
-    progress: {
-      label: "Overall Progress",
-      percent: 75,
-    },
-  },
-
-  {
-    id: "mentorship",
-    label: "Mentorship Hours",
-    value: "16.5",
-    valueUnit: "hrs",
-    icon: "supervised_user_circle",
-    iconTone: "tertiary",
-    footerLeftIcon: "event_upcoming",
-    footerLeftText: "Next Review Tomorrow",
-    footerDotTone: "secondary",
-  },
-];
+export const summaryStats = {
+  totalProjects: 4,
+  activeProjects: 3,
+  completedProjects: 1,
+  pendingTasks: 5,
+};
 
 /* =========================================================
-   ACTIVE PROJECTS
+   MENTORS
 ========================================================= */
 
-export const activeProjects = [
+export const mentors = {
+  "mayur-patil": {
+    id: "mayur-patil",
+    name: "Mayur Patil",
+    title: "Senior Software Developer • Internship Mentor",
+    online: true,
+    verified: true,
+  },
+};
+
+/* =========================================================
+   PROJECTS
+   Each project is the single source of truth for its own
+   overview, roadmap, action items, mentor feedback and
+   resources — everything the detail panel renders.
+========================================================= */
+
+export const projects = [
   {
     id: "intern-dashboard",
     name: "Intern Dashboard UI",
@@ -69,53 +57,144 @@ export const activeProjects = [
     featured: true,
 
     statusLabel: "In Progress",
-    statusTone: "primary",
-
-    progressLabel: "78% Completed",
+    progressPercent: 78,
 
     description:
       "Building responsive dashboard screens for tracking internship tasks, project progress, feedback, submissions, and learning activities.",
 
-    tags: [
-      "Next.js",
-      "React",
-      "Tailwind CSS",
-      "shadcn/ui",
-    ],
-
+    tags: ["Next.js", "React", "Tailwind CSS", "shadcn/ui"],
     extraTagCount: 2,
 
     dueLabel: "12 Days Remaining",
+    contributors: 2,
+    mentorId: "mayur-patil",
 
-    phaseLabel: "Phase 3 of 4: Dashboard Development",
+    eyebrow: "Current Project",
+    cohort: "Cohort 2026-Q3",
+    reviewStatus: "Approved by Mentor",
+    commitHash: "9f14bd8",
+    branch: "main",
+    ciStatus: "CI/CD Passing",
+    gauges: {
+      completionPercent: 78,
+      learningHours: 18,
+      evaluationScore: 92,
+    },
 
-    progressSegments: [
+    mentorFeedback: {
+      label: "Latest Mentor Feedback",
+      timeAgo: "2 days ago",
+      quote:
+        "Good progress on the dashboard implementation. Focus next on responsive behavior, reusable components, and keeping the user experience consistent across the remaining modules.",
+    },
+
+    documentation: projectDocumentation["intern-dashboard"],
+
+    roadmap: [
       {
-        widthPercent: 45,
-        tone: "secondary",
-        title: "Completed work",
+        id: "intern-dashboard-phase-1",
+        title: "Phase 1: Project Setup & Planning",
+        status: "done",
+        dateLabel: "Aug 12 • Done",
+        description:
+          "Project requirements reviewed, repository created, development environment configured, and initial project structure completed.",
       },
       {
-        widthPercent: 33,
-        tone: "primary-container",
-        title: "Current sprint",
-        pulse: true,
+        id: "intern-dashboard-phase-2",
+        title: "Phase 2: Core Dashboard Development",
+        status: "done",
+        dateLabel: "Aug 22 • Done",
+        description:
+          "Dashboard layout, navigation, reusable components, summary cards, and responsive page structure completed.",
       },
       {
-        widthPercent: 22,
-        tone: "surface-dim",
-        title: "Remaining tasks",
+        id: "intern-dashboard-phase-3",
+        title: "Phase 3: Tasks & Feedback Modules",
+        status: "current",
+        dateLabel: "Active Sprint",
+        description:
+          "Implementing task management, project progress, feedback requests, mentor comments, and action item tracking.",
+      },
+      {
+        id: "intern-dashboard-phase-4",
+        title: "Phase 4: Testing & Final Review",
+        status: "upcoming",
+        dateLabel: "Target Sep 18",
+        description:
+          "Responsive testing, UI improvements, bug fixing, mentor review, and final project submission.",
       },
     ],
 
-    contributors: 2,
+    tasks: [
+      {
+        id: "task-login",
+        title: "Complete login and authentication screen integration",
+        badgeLabel: "Completed",
+        badgeTone: "secondary",
+        completed: true,
+        completedLabel: "Passed",
+        assignee: { initials: "DK", tone: "primary" },
+        phaseId: "intern-dashboard-phase-2",
+      },
+      {
+        id: "task-dashboard-responsive",
+        title: "Complete responsive layout for the intern dashboard",
+        badgeLabel: "High Priority",
+        badgeTone: "primary",
+        dueLabel: "Due Today",
+        dueTone: "error",
+        assignee: { initials: "DK", tone: "primary" },
+        completed: false,
+        phaseId: "intern-dashboard-phase-3",
+      },
+      {
+        id: "task-feedback-modal",
+        title: "Implement Request Feedback modal and submission flow",
+        badgeLabel: "Medium Priority",
+        badgeTone: "primary-fixed",
+        dueLabel: "In 2d",
+        assignee: { initials: "DK", tone: "tertiary" },
+        completed: false,
+        phaseId: "intern-dashboard-phase-3",
+      },
+      {
+        id: "task-project-cards",
+        title: "Align project cards and improve project progress display",
+        badgeLabel: "UI Improvement",
+        badgeTone: "neutral",
+        dueLabel: "In 5d",
+        assignee: { initials: "DK", tone: "neutral" },
+        completed: false,
+        phaseId: "intern-dashboard-phase-3",
+      },
+    ],
 
-    tasksCompleted: 18,
-    tasksTotal: 23,
-
-    mentorName: "Rahul Patil",
-
-    approvalText: "Mentor Reviewed",
+    resources: [
+      {
+        id: "figma-design",
+        name: "Intern Dashboard UI Design",
+        meta: "Figma • Design Reference",
+        icon: "draw",
+        tone: "primary-fixed",
+        action: "link",
+      },
+      {
+        id: "project-requirements",
+        name: "Project Requirements.pdf",
+        meta: "1.8 MB • PDF Document",
+        icon: "picture_as_pdf",
+        tone: "error-container",
+        action: "download",
+      },
+      {
+        id: "api-documentation",
+        name: "API Documentation",
+        meta: "REST API • Reference",
+        icon: "database",
+        tone: "neutral",
+        action: "download",
+      },
+    ],
   },
 
   {
@@ -125,24 +204,127 @@ export const activeProjects = [
     icon: "learning",
 
     statusLabel: "Under Review",
-    statusTone: "secondary",
-
-    progressLabel: "92% Completed",
+    progressPercent: 92,
 
     description:
       "Developing an interactive task management module where interns can view assigned tasks, track deadlines, update progress, and manage task status.",
 
-    tags: [
-      "React",
-      "JavaScript",
-      "Tailwind CSS",
+    tags: ["React", "JavaScript", "Tailwind CSS"],
+
+    dueLabel: "Updated 3h ago",
+    contributors: 1,
+    mentorId: "mayur-patil",
+
+    eyebrow: "Cohort Project",
+    cohort: "Cohort 2026-Q3",
+    reviewStatus: "In Mentor Review",
+    commitHash: "c72a91e",
+    branch: "feature/task-store",
+    ciStatus: "CI/CD Passing",
+    gauges: {
+      completionPercent: 92,
+      learningHours: 14,
+      evaluationScore: 88,
+    },
+
+    mentorFeedback: {
+      label: "Latest Mentor Feedback",
+      timeAgo: "5 hours ago",
+      quote:
+        "Drag-and-drop and filtering both work well. Add test coverage for the task store before I sign this off for final review.",
+    },
+
+    documentation: projectDocumentation["task-management"],
+
+    roadmap: [
+      {
+        id: "task-management-phase-1",
+        title: "Phase 1: Module Setup & Data Model",
+        status: "done",
+        dateLabel: "Aug 6 • Done",
+        description:
+          "Task store, status enum, and base component structure scaffolded and reviewed.",
+      },
+      {
+        id: "task-management-phase-2",
+        title: "Phase 2: Core Interactions",
+        status: "done",
+        dateLabel: "Aug 20 • Done",
+        description:
+          "Drag-and-drop reordering, priority filtering, and deadline tracking implemented.",
+      },
+      {
+        id: "task-management-phase-3",
+        title: "Phase 3: QA & Mentor Review",
+        status: "current",
+        dateLabel: "Active Sprint",
+        description:
+          "Writing unit tests, fixing review comments, and preparing the module for final sign-off.",
+      },
     ],
 
-    footerIcon: "verified",
+    tasks: [
+      {
+        id: "task-mgmt-dnd",
+        title: "Implement drag-and-drop task reordering",
+        badgeLabel: "Completed",
+        badgeTone: "secondary",
+        completed: true,
+        completedLabel: "Passed",
+        assignee: { initials: "DK", tone: "primary" },
+        phaseId: "task-management-phase-2",
+      },
+      {
+        id: "task-mgmt-filter",
+        title: "Add task filtering by priority and status",
+        badgeLabel: "Completed",
+        badgeTone: "secondary",
+        completed: true,
+        completedLabel: "Passed",
+        assignee: { initials: "DK", tone: "primary" },
+        phaseId: "task-management-phase-2",
+      },
+      {
+        id: "task-mgmt-tests",
+        title: "Write unit tests for the task store",
+        badgeLabel: "High Priority",
+        badgeTone: "primary",
+        dueLabel: "Due Tomorrow",
+        dueTone: "error",
+        assignee: { initials: "DK", tone: "primary" },
+        completed: false,
+        phaseId: "task-management-phase-3",
+      },
+      {
+        id: "task-mgmt-review-notes",
+        title: "Resolve mentor review comments on PR #42",
+        badgeLabel: "Mentor Review",
+        badgeTone: "primary-fixed",
+        dueLabel: "In 2d",
+        assignee: { initials: "DK", tone: "tertiary" },
+        completed: false,
+        phaseId: "task-management-phase-3",
+      },
+    ],
 
-    footerText: "Mentor review in progress",
-
-    updatedLabel: "Updated 3h ago",
+    resources: [
+      {
+        id: "task-state-diagram",
+        name: "Task State Diagram.pdf",
+        meta: "420 KB • PDF Document",
+        icon: "picture_as_pdf",
+        tone: "error-container",
+        action: "download",
+      },
+      {
+        id: "dnd-library-docs",
+        name: "Drag & Drop Library Docs",
+        meta: "External • Reference",
+        icon: "terminal",
+        tone: "neutral",
+        action: "link",
+      },
+    ],
   },
 
   {
@@ -152,258 +334,126 @@ export const activeProjects = [
     icon: "certificate",
 
     statusLabel: "Planning",
-    statusTone: "primary",
-
-    progressLabel: "25% Started",
+    progressPercent: 25,
 
     description:
       "Creating a feedback experience for interns to review mentor comments, understand improvement areas, track action items, and request feedback.",
 
-    tags: [
-      "Next.js",
-      "React",
-      "shadcn/ui",
-      "Lucide",
+    tags: ["Next.js", "React", "shadcn/ui", "Lucide"],
+
+    dueLabel: "Created 2 days ago",
+    contributors: 1,
+    mentorId: "mayur-patil",
+
+    eyebrow: "New Project",
+    cohort: "Cohort 2026-Q3",
+    reviewStatus: "Requirements Reviewed",
+    commitHash: "1a2f6c0",
+    branch: "main",
+    ciStatus: "CI/CD Not Yet Configured",
+    gauges: {
+      completionPercent: 25,
+      learningHours: 6,
+      evaluationScore: 0,
+    },
+
+    mentorFeedback: {
+      label: "Latest Mentor Feedback",
+      timeAgo: "1 day ago",
+      quote:
+        "Requirements look solid. Get wireframes in front of me before you start building the form components.",
+    },
+
+    documentation: projectDocumentation["feedback-module"],
+
+    roadmap: [
+      {
+        id: "feedback-module-phase-1",
+        title: "Phase 1: Requirements & Scope",
+        status: "done",
+        dateLabel: "Sep 2 • Done",
+        description:
+          "Feedback flow requirements gathered and reviewed with the mentor.",
+      },
+      {
+        id: "feedback-module-phase-2",
+        title: "Phase 2: UX & Wireframes",
+        status: "current",
+        dateLabel: "Active Sprint",
+        description:
+          "Drafting the feedback form schema and reviewing wireframes before development starts.",
+      },
+      {
+        id: "feedback-module-phase-3",
+        title: "Phase 3: Build & Integrate",
+        status: "upcoming",
+        dateLabel: "Target Sep 24",
+        description:
+          "Build feedback components, connect to mentor comments, and wire up action item tracking.",
+      },
+      {
+        id: "feedback-module-phase-4",
+        title: "Phase 4: Review & Launch",
+        status: "upcoming",
+        dateLabel: "Target Oct 1",
+        description: "Mentor review, polish, and rollout to the cohort.",
+      },
     ],
 
-    footerIcon: "design_services",
+    tasks: [
+      {
+        id: "feedback-schema",
+        title: "Draft feedback form schema",
+        badgeLabel: "Completed",
+        badgeTone: "secondary",
+        completed: true,
+        completedLabel: "Passed",
+        assignee: { initials: "DK", tone: "primary" },
+        phaseId: "feedback-module-phase-1",
+      },
+      {
+        id: "feedback-wireframes",
+        title: "Review UX wireframes with mentor",
+        badgeLabel: "Medium Priority",
+        badgeTone: "primary-fixed",
+        dueLabel: "In 3d",
+        assignee: { initials: "DK", tone: "tertiary" },
+        completed: false,
+        phaseId: "feedback-module-phase-2",
+      },
+    ],
 
-    footerText: "Initial requirements reviewed",
-
-    updatedLabel: "Created 2 days ago",
+    resources: [
+      {
+        id: "feedback-wireframes-file",
+        name: "Feedback Form Wireframes",
+        meta: "Figma • Design Reference",
+        icon: "draw",
+        tone: "primary-fixed",
+        action: "link",
+      },
+      {
+        id: "rubric-guidelines",
+        name: "Evaluation Rubric Guidelines.pdf",
+        meta: "640 KB • PDF Document",
+        icon: "picture_as_pdf",
+        tone: "error-container",
+        action: "download",
+      },
+    ],
   },
 ];
 
 /* =========================================================
-   CURRENT PROJECT TASKS
+   PROGRAM-WIDE RESOURCES
+   Shown alongside every project's own resources.
 ========================================================= */
 
-export const sprintTasks = [
-  {
-    id: "task-dashboard-responsive",
-    title:
-      "Complete responsive layout for the intern dashboard",
-
-    badgeLabel: "High Priority",
-    badgeTone: "primary",
-
-    dueLabel: "Due Today",
-    dueTone: "error",
-
-    assignee: {
-      initials: "SM",
-      tone: "primary",
-    },
-
-    completed: false,
-  },
-
-  {
-    id: "task-feedback-modal",
-    title:
-      "Implement Request Feedback modal and submission flow",
-
-    badgeLabel: "Medium Priority",
-    badgeTone: "primary-fixed",
-
-    dueLabel: "In 2d",
-
-    assignee: {
-      initials: "SM",
-      tone: "tertiary",
-    },
-
-    completed: false,
-  },
-
-  {
-    id: "task-project-cards",
-    title:
-      "Align project cards and improve project progress display",
-
-    badgeLabel: "UI Improvement",
-    badgeTone: "neutral",
-
-    dueLabel: "In 5d",
-
-    assignee: {
-      initials: "SM",
-      tone: "neutral",
-    },
-
-    completed: false,
-  },
-
-  {
-    id: "task-login",
-    title:
-      "Complete login and authentication screen integration",
-
-    badgeLabel: "Completed",
-    badgeTone: "secondary",
-
-    completed: true,
-
-    completedLabel: "Passed",
-  },
-];
-
-/* =========================================================
-   TASK COUNTS
-========================================================= */
-
-export const taskCounts = {
-  all: 17,
-  pending: 5,
-  completed: 12,
-  shown: 4,
-};
-
-/* =========================================================
-   ACTIVE PROJECT DETAILS
-========================================================= */
-
-export const activeProjectDetail = {
-  eyebrow: "Current Project",
-
-  name: "Intern Dashboard UI",
-
-  description:
-    "A responsive internship dashboard that helps interns manage assigned tasks, monitor project progress, review mentor feedback, submit work, and stay on top of deadlines.",
-
-  gauges: {
-    testCoveragePercent: 88,
-    sprintVelocity: "24.5",
-    burndownChangePercent: 14,
-  },
-
-  commitHash: "9f14bd8",
-
-  branch: "main",
-
-  ciStatus: "CI/CD Passing",
-};
-
-/* =========================================================
-   PROJECT MILESTONES
-========================================================= */
-
-export const milestones = [
-  {
-    id: "phase-1",
-
-    title: "Phase 1: Project Setup & Planning",
-
-    status: "done",
-
-    dateLabel: "Aug 12 • Done",
-
-    description:
-      "Project requirements reviewed, repository created, development environment configured, and initial project structure completed.",
-  },
-
-  {
-    id: "phase-2",
-
-    title: "Phase 2: Core Dashboard Development",
-
-    status: "done",
-
-    dateLabel: "Aug 22 • Done",
-
-    description:
-      "Dashboard layout, navigation, reusable components, summary cards, and responsive page structure completed.",
-  },
-
-  {
-    id: "phase-3",
-
-    title: "Phase 3: Tasks & Feedback Modules",
-
-    status: "current",
-
-    dateLabel: "Active Sprint",
-
-    description:
-      "Implementing task management, project progress, feedback requests, mentor comments, and action item tracking.",
-  },
-
-  {
-    id: "phase-4",
-
-    title: "Phase 4: Testing & Final Review",
-
-    status: "upcoming",
-
-    dateLabel: "Target Sep 18",
-
-    description:
-      "Responsive testing, UI improvements, bug fixing, mentor review, and final project submission.",
-  },
-];
-
-/* =========================================================
-   PROJECT MENTOR
-========================================================= */
-
-export const mentor = {
-  name: "Rahul Patil",
-
-  title: "Senior Software Developer • Internship Mentor",
-
-  online: true,
-
-  verified: true,
-
-  avatarAlt:
-    "Professional portrait of an experienced software development mentor",
-
-  feedback: {
-    label: "Latest Mentor Feedback",
-
-    timeAgo: "2 days ago",
-
-    quote:
-      "Good progress on the dashboard implementation. Focus next on responsive behavior, reusable components, and keeping the user experience consistent across the remaining modules.",
-  },
-};
-
-/* =========================================================
-   PROJECT RESOURCES
-========================================================= */
-
-export const resources = [
-  {
-    id: "figma-design",
-    name: "Intern Dashboard UI Design",
-    meta: "Figma • Design Reference",
-    icon: "draw",
-    tone: "primary-fixed",
-    action: "link",
-  },
-
-  {
-    id: "project-requirements",
-    name: "Project Requirements.pdf",
-    meta: "1.8 MB • PDF Document",
-    icon: "picture_as_pdf",
-    tone: "error-container",
-    action: "download",
-  },
-
-  {
-    id: "api-documentation",
-    name: "API Documentation",
-    meta: "REST API • Reference",
-    icon: "database",
-    tone: "neutral",
-    action: "download",
-  },
-
+export const programResources = [
   {
     id: "intern-guidelines",
     name: "Internship Development Guidelines",
-    meta: "Markdown • Reference",
+    meta: "Markdown • Program-wide Reference",
     icon: "terminal",
     tone: "secondary-container",
     action: "download",
@@ -411,20 +461,31 @@ export const resources = [
 ];
 
 /* =========================================================
+   LEGACY SINGLE-MENTOR EXPORT
+   Other pages in the app (e.g. the dashboard Overview page) still
+   import a single `mentor` object with the old shape. Keep it working
+   without forcing every consumer to switch to the new `mentors` map —
+   it's just the featured project's mentor + feedback, reshaped.
+========================================================= */
+
+const featuredProject = projects.find((p) => p.featured) ?? projects[0];
+const featuredMentor = mentors[featuredProject?.mentorId];
+
+export const mentor = featuredMentor
+  ? {
+      ...featuredMentor,
+      feedback: featuredProject.mentorFeedback,
+    }
+  : null;
+
+/* =========================================================
    PROJECT FILTER OPTIONS
 ========================================================= */
 
 export const projectStatusOptions = [
-  "All Active",
+  "All",
   "In Progress",
   "Under Review",
   "Planning",
   "Completed",
-];
-
-export const priorityOptions = [
-  "High & Medium",
-  "High",
-  "Medium",
-  "Low",
 ];

@@ -81,7 +81,7 @@ export const CODE_STATS = {
 export const FEEDBACK = {
   totalReviews: 8,
   trend: "Improving",
-  mentor: "Rahul Patil",
+  mentor: "Mayur Patil",
   mentorRole: "Senior Software Developer · Mentor",
   date: "Sep 15, 2026",
   quote:
@@ -170,7 +170,7 @@ export const RECENT_ACTIVITY = [
   {
     id: "a4",
     type: "feedback",
-    title: "New feedback from Rahul Patil",
+    title: "New feedback from Mayur Patil",
     description: "Review on the dashboard implementation.",
     time: "Sep 15",
   },
@@ -193,13 +193,6 @@ export const BREAKDOWN = [
     tone: "blue",
   },
   { key: "tasks", label: "Tasks", value: pct(TASKS.completed, TASKS.total), tone: "indigo" },
-  { key: "learning", label: "Learning", value: pct(LEARNING.completed, LEARNING.total), tone: "violet" },
-  {
-    key: "skills",
-    label: "Skills",
-    value: Math.round(average(SKILLS.map((s) => s.progress))),
-    tone: "emerald",
-  },
 ];
 
 export const OVERALL_PROGRESS = Math.round(average(BREAKDOWN.map((b) => b.value)));

@@ -10,14 +10,38 @@ export default function ProjectsSummary({
   pendingTasks = 0,
 }) {
   const cards = [
-    { icon: FolderKanban, label: "Total Projects", value: totalProjects, tone: "blue" },
-    { icon: Clock3, label: "Active", value: activeProjects, tone: "indigo" },
-    { icon: CircleCheckBig, label: "Completed", value: completedProjects, tone: "emerald" },
-    { icon: ListTodo, label: "Pending Tasks", value: pendingTasks, tone: "amber" },
+    {
+      icon: FolderKanban,
+      label: "Total Projects",
+      value: totalProjects,
+      tone: "blue",
+      trendLabel: "Portfolio total",
+    },
+    {
+      icon: Clock3,
+      label: "Active Sprints",
+      value: activeProjects,
+      tone: "indigo",
+      trendLabel: "In progress now",
+    },
+    {
+      icon: CircleCheckBig,
+      label: "Completed",
+      value: completedProjects,
+      tone: "emerald",
+      trendLabel: "Verified milestones",
+    },
+    {
+      icon: ListTodo,
+      label: "Pending Deliverables",
+      value: pendingTasks,
+      tone: "amber",
+      trendLabel: "Needs your attention",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {cards.map((card) => (
         <MiniStatCard key={card.label} {...card} />
       ))}

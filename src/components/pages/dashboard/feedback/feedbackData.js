@@ -4,10 +4,11 @@ export const FEEDBACK_STATUSES = ["Action Required", "In Review", "Resolved"];
 export const INITIAL_FEEDBACK = [
   {
     id: "FB-1048",
-    title: "Dashboard UI Implementation",
-    project: "Intern Dashboard",
+    taskId: 4,
+    title: "Playwright integration tests",
+    project: "Customer Portal",
     category: "Code Quality",
-    mentor: "Rahul Patil",
+    mentor: "Mayur Patil",
     role: "Frontend Mentor",
     rating: 4.8,
     status: "Resolved",
@@ -25,8 +26,9 @@ export const INITIAL_FEEDBACK = [
   },
   {
     id: "FB-1045",
-    title: "API Integration",
-    project: "Intern Dashboard",
+    taskId: 2,
+    title: "Multi-tenant database schema",
+    project: "Data Platform",
     category: "System Design",
     mentor: "Ananya Sharma",
     role: "Backend Mentor",
@@ -42,8 +44,9 @@ export const INITIAL_FEEDBACK = [
   },
   {
     id: "FB-1042",
-    title: "Login & Registration UI",
-    project: "Authentication Module",
+    taskId: 1,
+    title: "JWT refresh token rotation",
+    project: "Auth Service",
     category: "UI / UX",
     mentor: "Priya Sharma",
     role: "UI/UX Mentor",
@@ -60,10 +63,11 @@ export const INITIAL_FEEDBACK = [
   },
   {
     id: "FB-1039",
-    title: "Project Documentation",
-    project: "Intern Dashboard",
+    taskId: 3,
+    title: "GraphQL query optimization",
+    project: "Customer Portal",
     category: "Code Quality",
-    mentor: "Rahul Patil",
+    mentor: "Mayur Patil",
     role: "Frontend Mentor",
     rating: 4.9,
     status: "Resolved",
@@ -74,8 +78,9 @@ export const INITIAL_FEEDBACK = [
   },
   {
     id: "FB-1035",
-    title: "Testing & Validation",
-    project: "Task Module",
+    taskId: 9,
+    title: "Cypress end-to-end suite",
+    project: "Customer Portal",
     category: "Testing",
     mentor: "Ananya Sharma",
     role: "Technical Mentor",
@@ -89,7 +94,7 @@ export const INITIAL_FEEDBACK = [
 ];
 
 export const MENTORS = [
-  { value: "Rahul Patil", label: "Rahul Patil — Frontend Mentor" },
+  { value: "Mayur Patil", label: "Mayur Patil — Frontend Mentor" },
   { value: "Ananya Sharma", label: "Ananya Sharma — Backend Mentor" },
   { value: "Priya Sharma", label: "Priya Sharma — UI/UX Mentor" },
 ];

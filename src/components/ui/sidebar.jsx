@@ -111,7 +111,7 @@ function SidebarProvider({
         data-slot="sidebar-wrapper"
         style={
           {
-            "--sidebar-width": "11rem",
+            "--sidebar-width": "13rem",
             "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
             ...style
           }

@@ -1,7 +1,6 @@
 "use client";
 
 import AboutSection from "./AboutSection";
-import PersonalDetailsCard from "./PersonalDetailsCard";
 import SkillsCard from "./SkillsCard";
 import InternshipCard from "./InternshipCard";
 import ConnectionsCard from "./ConnectionsCard";
@@ -22,10 +21,14 @@ export default function ProfileOverview({
 }) {
   return (
     <div className="space-y-5">
-      <AboutSection isEditing={isEditing} formData={formData} handleChange={handleChange} />
+      <AboutSection
+        isEditing={isEditing}
+        formData={formData}
+        handleChange={handleChange}
+      />
 
-      <div className="grid gap-5 lg:grid-cols-3">
-        <PersonalDetailsCard formData={formData} isEditing={isEditing} handleChange={handleChange} className="lg:col-span-2" />
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
+        <InternshipCard formData={formData} />
         <SkillsCard
           skills={skills}
           isEditing={isEditing}
@@ -35,8 +38,6 @@ export default function ProfileOverview({
           handleRemoveSkill={handleRemoveSkill}
         />
       </div>
-
-      <InternshipCard formData={formData} />
 
       <ConnectionsCard
         formData={formData}
@@ -50,3 +51,6 @@ export default function ProfileOverview({
     </div>
   );
 }
+
+// Details, education, and certifications intentionally live in the Details tab.
+// Keeping them out of Overview prevents the page from becoming one very long card stack.

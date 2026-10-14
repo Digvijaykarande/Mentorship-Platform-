@@ -1,16 +1,21 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pencil, Check, X } from "lucide-react";
-
 import ProfileHeader from "@/components/pages/dashboard/profile/ProfileHeader";
 import ProfileTabs from "@/components/pages/dashboard/profile/ProfileTabs";
 import ProfileOverview from "@/components/pages/dashboard/profile/ProfileOverview";
-import ProfileComingSoon from "@/components/pages/dashboard/profile/ProfileComingSoon";
+import ProfileDetails from "@/components/pages/dashboard/profile/PersonalDetailsCard";
+import ProfileSettings from "@/components/pages/dashboard/profile/ProfileSettings";
+import ProfileShare from "@/components/pages/dashboard/profile/ProfileShare";
+import AvatarCropDialog from "@/components/pages/dashboard/profile/AvatarCropDialog";
+import { getProfileCompletion } from "@/lib/profileCompletion";
 import PageHeader from "@/components/common/PageHeader";
 import SaveToast from "@/components/common/SaveToast";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+
+const MAX_AVATAR_SIZE = 10 * 1024 * 1024; // 10 MB
 
 const INITIAL_FORM_DATA = {
   firstName: "Digvijay",
@@ -31,15 +36,23 @@ const INITIAL_FORM_DATA = {
   bio: "Passionate Computer Applications student & Frontend Development Intern focused on building sleek, accessible, and high-performance modern web platforms using React, Next.js, and Tailwind CSS.",
   careerInterests: "Frontend Engineering, UI/UX and Full-Stack Development",
   areasOfInterest: "Web Development, Artificial Intelligence, Cloud Computing",
-  professionalGoals: "To become a skilled full-stack developer and build scalable, user-focused digital products.",
+  professionalGoals:
+    "To become a skilled full-stack developer and build scalable, user-focused digital products.",
   linkedin: "linkedin.com/in/digvijaykarande",
   github: "github.com/digvijaykarande",
   portfolio: "digvijaykarande.dev",
   website: "digvijaykarande.dev",
   otherLinks: [],
 };
-
-const INITIAL_SKILLS = ["React.js", "Next.js", "TypeScript", "Tailwind CSS", "JavaScript (ES6+)", "Git & GitHub", "REST APIs"];
+const INITIAL_SKILLS = [
+  "React.js",
+  "Next.js",
+  "TypeScript",
+  "Tailwind CSS",
+  "JavaScript (ES6+)",
+  "Git & GitHub",
+  "REST APIs",
+];
 
 function useProfileForm(onSaveSuccess) {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
@@ -47,51 +60,53 @@ function useProfileForm(onSaveSuccess) {
   const [skills, setSkills] = useState(INITIAL_SKILLS);
   const [initialSkills, setInitialSkills] = useState(INITIAL_SKILLS);
   const [newSkill, setNewSkill] = useState("");
-  const [newProfessionalLink, setNewProfessionalLink] = useState({ name: "", url: "" });
+  const [newProfessionalLink, setNewProfessionalLink] = useState({
+    name: "",
+    url: "",
+  });
   const [isEditing, setIsEditing] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
+  const handleChange = (e) =>
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   const handleAddSkill = () => {
     const skill = newSkill.trim();
     if (!skill || skills.includes(skill)) return;
     setSkills((prev) => [...prev, skill]);
     setNewSkill("");
   };
-
-  const handleRemoveSkill = (skillToRemove) => setSkills((prev) => prev.filter((s) => s !== skillToRemove));
-
+  const handleRemoveSkill = (skill) =>
+    setSkills((prev) => prev.filter((item) => item !== skill));
   const handleProfessionalLinkChange = (field, value) =>
     setNewProfessionalLink((prev) => ({ ...prev, [field]: value }));
-
   const handleAddProfessionalLink = () => {
     const { name, url } = newProfessionalLink;
     if (!name.trim() || !url.trim()) return;
-    setFormData((prev) => ({ ...prev, otherLinks: [...(prev.otherLinks || []), { name: name.trim(), url: url.trim() }] }));
+    setFormData((prev) => ({
+      ...prev,
+      otherLinks: [
+        ...(prev.otherLinks || []),
+        { name: name.trim(), url: url.trim() },
+      ],
+    }));
     setNewProfessionalLink({ name: "", url: "" });
   };
-
-  const handleRemoveProfessionalLink = (indexToRemove) =>
-    setFormData((prev) => ({ ...prev, otherLinks: prev.otherLinks.filter((_, idx) => idx !== indexToRemove) }));
-
+  const handleRemoveProfessionalLink = (index) =>
+    setFormData((prev) => ({
+      ...prev,
+      otherLinks: prev.otherLinks.filter((_, idx) => idx !== index),
+    }));
   const handleCancel = () => {
     setFormData(initialState);
     setSkills(initialSkills);
-    setIsEditing(false);
     setNewProfessionalLink({ name: "", url: "" });
+    setIsEditing(false);
   };
-
   const handleSave = () => {
     setInitialState(formData);
     setInitialSkills(skills);
-    setIsEditing(false);
     setNewProfessionalLink({ name: "", url: "" });
+    setIsEditing(false);
     onSaveSuccess?.();
   };
-
   return {
     formData,
     skills,
@@ -114,80 +129,121 @@ function useProfileForm(onSaveSuccess) {
 export default function ProfilePage() {
   const avatarInputRef = useRef(null);
   const [avatarUrl, setAvatarUrl] = useState(null);
+  const [pendingAvatarSrc, setPendingAvatarSrc] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-
-  const handleSaveSuccess = () => {
+  const profile = useProfileForm(() => {
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-  };
+    window.setTimeout(() => setShowToast(false), 3000);
+  });
 
-  const profile = useProfileForm(handleSaveSuccess);
-
+  useEffect(
+    () => () => {
+      if (avatarUrl) URL.revokeObjectURL(avatarUrl);
+    },
+    [avatarUrl],
+  );
+  // File pick -> open the editor. The photo is only applied once the user confirms.
   const handleAvatarUpload = (e) => {
     const file = e.target.files?.[0];
-    if (file) setAvatarUrl(URL.createObjectURL(file));
+    e.target.value = ""; // allow re-picking the same file
+    if (!file) return;
+    if (!file.type.startsWith("image/") || file.size > MAX_AVATAR_SIZE) return;
+    setPendingAvatarSrc((old) => {
+      if (old) URL.revokeObjectURL(old);
+      return URL.createObjectURL(file);
+    });
+  };
+  const closeAvatarEditor = () =>
+    setPendingAvatarSrc((old) => {
+      if (old) URL.revokeObjectURL(old);
+      return null;
+    });
+  const handleAvatarApply = (blob) => {
+    setAvatarUrl((oldUrl) => {
+      if (oldUrl) URL.revokeObjectURL(oldUrl);
+      return URL.createObjectURL(blob);
+    });
+    closeAvatarEditor();
   };
 
+  const completion = getProfileCompletion({
+    formData: profile.formData,
+    skills: profile.skills,
+    hasAvatar: Boolean(avatarUrl),
+  });
+
   return (
-    <div className="relative mx-auto max-w-5xl space-y-5 p-4 sm:p-6">
+    <div className="relative mx-auto w-full max-w-6xl space-y-5 px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
       <SaveToast
         show={showToast}
         title="Profile updated"
         description="Your profile changes were saved successfully."
         onClose={() => setShowToast(false)}
       />
-
-      <PageHeader title="Profile Management" subtitle="Manage your personal profile and public presence">
+      <PageHeader
+        title="Profile Management"
+        subtitle="Manage your personal profile and public presence"
+      >
         {profile.isEditing ? (
-          <>
-            <Button type="button" variant="outline" size="sm" onClick={profile.handleCancel} className="gap-1.5">
+          <div className="flex w-full gap-2 sm:w-auto">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={profile.handleCancel}
+              className="flex-1 gap-1.5 sm:flex-none"
+            >
               <X className="h-3.5 w-3.5" />
               Cancel
             </Button>
-            <Button type="button" size="sm" onClick={profile.handleSave} className="gap-1.5 bg-blue-600 text-white hover:bg-blue-700">
+            <Button
+              type="button"
+              size="sm"
+              onClick={profile.handleSave}
+              className="flex-1 gap-1.5 bg-blue-600 text-white hover:bg-blue-700 sm:flex-none"
+            >
               <Check className="h-3.5 w-3.5" />
               Save Changes
             </Button>
-          </>
+          </div>
         ) : (
           <Button
             type="button"
             size="sm"
             onClick={() => profile.setIsEditing(true)}
-            className="gap-1.5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+            className="w-full gap-1.5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 sm:w-auto"
           >
             <Pencil className="h-3.5 w-3.5" />
             Edit Profile
           </Button>
         )}
       </PageHeader>
-
-      <ProfileHeader formData={profile.formData} avatarUrl={avatarUrl} avatarInputRef={avatarInputRef} handleAvatarUpload={handleAvatarUpload} />
-
+      <ProfileHeader
+        formData={profile.formData}
+        avatarUrl={avatarUrl}
+        avatarInputRef={avatarInputRef}
+        handleAvatarUpload={handleAvatarUpload}
+        completion={completion}
+      />
+      <AvatarCropDialog
+        open={Boolean(pendingAvatarSrc)}
+        src={pendingAvatarSrc}
+        onCancel={closeAvatarEditor}
+        onApply={handleAvatarApply}
+      />
       <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-5">
         <ProfileTabs />
-
         <TabsContent value="overview">
-          <ProfileOverview
-            formData={profile.formData}
-            isEditing={profile.isEditing}
-            handleChange={profile.handleChange}
-            skills={profile.skills}
-            newSkill={profile.newSkill}
-            setNewSkill={profile.setNewSkill}
-            handleAddSkill={profile.handleAddSkill}
-            handleRemoveSkill={profile.handleRemoveSkill}
-            newProfessionalLink={profile.newProfessionalLink}
-            handleProfessionalLinkChange={profile.handleProfessionalLinkChange}
-            handleAddProfessionalLink={profile.handleAddProfessionalLink}
-            handleRemoveProfessionalLink={profile.handleRemoveProfessionalLink}
-          />
+          <ProfileOverview {...profile} />
         </TabsContent>
-
-        <TabsContent value="details"><ProfileComingSoon label="Details" /></TabsContent>
-        <TabsContent value="settings"><ProfileComingSoon label="Settings" /></TabsContent>
-        <TabsContent value="share"><ProfileComingSoon label="Share" /></TabsContent>
+        <TabsContent value="details" className="space-y-5">
+          <ProfileDetails formData={profile.formData} />
+          <ProfileShare formData={profile.formData} />
+        </TabsContent>
+        <TabsContent value="settings">
+          <ProfileSettings />
+        </TabsContent>
       </Tabs>
     </div>
   );

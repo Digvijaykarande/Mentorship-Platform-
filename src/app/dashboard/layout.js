@@ -1,5 +1,6 @@
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
 import DashboardNavbar from "@/components/layout/DashboardNavbar";
+import { NotificationsProvider } from "@/hooks/NotificationsProvider";
 
 import {
   SidebarProvider,
@@ -8,16 +9,18 @@ import {
 
 export default function DashboardLayout({ children }) {
   return (
-    <SidebarProvider>
-      <DashboardSidebar />
+    <NotificationsProvider>
+      <SidebarProvider>
+        <DashboardSidebar />
 
-      <SidebarInset>
-        <DashboardNavbar />
+        <SidebarInset>
+          <DashboardNavbar />
 
-        <main className="min-h-[calc(100vh-4rem)] bg-slate-50 dark:bg-background">
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+          <main className="min-h-[calc(100vh-3.5rem)] bg-slate-50 dark:bg-background">
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    </NotificationsProvider>
   );
 }

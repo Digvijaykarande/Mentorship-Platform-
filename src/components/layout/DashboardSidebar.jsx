@@ -96,9 +96,7 @@ function MenuList({ items, pathname, router }) {
 
               <span
                 className={`truncate text-xs font-medium group-data-[collapsible=icon]:hidden ${
-                  active
-                    ? "font-semibold text-slate-950 dark:text-white"
-                    : ""
+                  active ? "font-semibold text-slate-950 dark:text-white" : ""
                 }`}
               >
                 {title}
@@ -132,7 +130,7 @@ function Section({ title, children }) {
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { setOpenMobile, isMobile, toggleSidebar, state } = useSidebar();
+  const { setOpenMobile, isMobile, toggleSidebar } = useSidebar();
 
   const handleProfileClick = () => {
     router.push("/dashboard/profile");
@@ -140,7 +138,7 @@ export default function DashboardSidebar() {
   };
 
   const handleLogoutClick = () => {
-    router.push("/login");
+    router.push("/auth/login");
     if (isMobile) setOpenMobile(false);
   };
 
@@ -179,42 +177,33 @@ export default function DashboardSidebar() {
       {/* CONTENT */}
       <SidebarContent className="gap-4 bg-white/90 px-3 py-4 dark:bg-slate-900/80 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2 group-data-[collapsible=icon]:py-3">
         <Section title="Platform">
-          <MenuList
-            items={MENU}
-            pathname={pathname}
-            router={router}
-          />
+          <MenuList items={MENU} pathname={pathname} router={router} />
         </Section>
 
         <SidebarSeparator className="mx-0 my-0 group-data-[collapsible=icon]:w-8" />
 
         <Section title="System">
-          <MenuList
-            items={SETTINGS}
-            pathname={pathname}
-            router={router}
-          />
+          <MenuList items={SETTINGS} pathname={pathname} router={router} />
         </Section>
       </SidebarContent>
 
       {/* FOOTER */}
       <SidebarFooter className="shrink-0 border-t border-slate-200/60 bg-white/90 p-2.5 dark:border-slate-700/60 dark:bg-slate-900/80 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
-        {/* DESKTOP COLLAPSE TOGGLE */}
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          title={state === "collapsed" ? "Expand sidebar" : "Collapse sidebar"}
-          className="mt-1 hidden h-8 w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg text-slate-400 transition-colors duration-200 hover:bg-slate-100/60 hover:text-slate-600 md:flex dark:hover:bg-slate-800/40 dark:hover:text-slate-300 group-data-[collapsible=icon]:w-9"
-        >
-          <PanelLeft
-            className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
-              state === "collapsed" ? "rotate-180" : ""
-            }`}
-          />
-          <span className="text-[10.5px] font-medium group-data-[collapsible=icon]:hidden">
-            Collapse
-          </span>
-        </button>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              type="button"
+              tooltip="Logout"
+              onClick={handleLogoutClick}
+              className="h-9 w-full cursor-pointer rounded-lg px-2.5 text-red-600 transition-colors duration-200 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-950/40 dark:hover:text-red-300 group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+            >
+              <LogOut className="h-[16px] w-[16px] shrink-0 stroke-[2]" />
+              <span className="truncate text-xs font-medium group-data-[collapsible=icon]:hidden">
+                Logout
+              </span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );

@@ -1,11 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
 
 /**
  * Labeled on/off switch used in Settings (notifications, 2FA, compact sidebar, etc).
+ * Uses the shadcn Switch component.
  */
-export default function ToggleField({ checked, onChange, label, description, className }) {
+export default function ToggleField({ checked, onChange, label, description, className, disabled = false }) {
   return (
     <div className={cn("flex items-center justify-between gap-4", className)}>
       {label && (
@@ -16,26 +18,12 @@ export default function ToggleField({ checked, onChange, label, description, cla
           )}
         </div>
       )}
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
+      <Switch
+        checked={checked}
+        onCheckedChange={onChange}
+        disabled={disabled}
         aria-label={label}
-        onClick={() => onChange(!checked)}
-        className={cn(
-          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30",
-          checked
-            ? "bg-blue-600 shadow-xs shadow-blue-500/30 dark:bg-blue-500"
-            : "bg-slate-200 dark:bg-slate-800"
-        )}
-      >
-        <span
-          className={cn(
-            "pointer-events-none block h-4 w-4 rounded-full bg-white shadow-xs transition-transform duration-200",
-            checked ? "translate-x-4" : "translate-x-0"
-          )}
-        />
-      </button>
+      />
     </div>
   );
 }
